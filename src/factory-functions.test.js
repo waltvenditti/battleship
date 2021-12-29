@@ -1,8 +1,9 @@
-import { shipFactory } from './factory-functions.js';
+import { shipFactory, getCoords } from './factory-functions.js';
 
 let testShip;
 let testShipFail;
 
+// tests for shipFactory
 beforeAll(() => {
     testShip = shipFactory(3);
     testShipFail = shipFactory(6);
@@ -51,4 +52,19 @@ describe('see if ship sinks after two more hits', () => {
     test('confirm sunk status is true', () => {
         expect(testShip.getSunkStatus()).toBe(true);
     });
+});
+
+
+// tests for getCoords
+test('eval the getCoords function horizontally', () => {
+    expect(getCoords(2, ['A',1],'horizontal')).toEqual([['A',2],['A',3]]);
+})
+test('eval the getCoords function vertically', () => {
+    expect(getCoords(2, ['A',1],'vertical')).toEqual([['B',1],['C',1]]);
+})
+test('see if horizontal fail returns null', () => {
+    expect(getCoords(2, ['A',9],'horizontal')).toEqual(null);
+})
+test('see if vertical fail returns null', () => {
+    expect(getCoords(2, ['I',1],'vertical')).toEqual(null);
 })
