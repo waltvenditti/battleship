@@ -1,14 +1,16 @@
-import { shipFactory, getCoords, gameboardFactory, checkArrayEquality } from './factory-functions.js';
+import { shipFactory, getCoords, gameboardFactory, checkArrayEquality, createPlayer } from './factory-functions.js';
 
 let testShip;
 let testShipFail;
 let testBoard;
+let testPlayer;
 
 // tests for shipFactory
 beforeAll(() => {
     testShip = shipFactory(3);
     testShipFail = shipFactory(6);
     testBoard = gameboardFactory();
+    testPlayer = createPlayer('Test', 'human');
 });
 
 test('confirm ship not made if wrong size submitted', () => {
@@ -60,16 +62,16 @@ describe('see if ship sinks after two more hits', () => {
 // tests for getCoords
 test('eval the getCoords function horizontally', () => {
     expect(getCoords(2, ['A',1],'horizontal')).toEqual([['A',1],['A',2]]);
-})
+});
 test('eval the getCoords function vertically', () => {
     expect(getCoords(2, ['A',1],'vertical')).toEqual([['A',1],['B',1]]);
-})
+});
 test('see if horizontal fail returns null', () => {
-    expect(getCoords(2, ['A',9],'horizontal')).toEqual(null);
-})
+    expect(getCoords(3, ['A',9],'horizontal')).toEqual(null);
+});
 test('see if vertical fail returns null', () => {
-    expect(getCoords(2, ['I',1],'vertical')).toEqual(null);
-})
+    expect(getCoords(3, ['I',1],'vertical')).toEqual(null);
+});
 
 
 // test checkArrayEquality
@@ -105,10 +107,36 @@ describe('will place ships on gameboard', () => {
         testBoard.checkHit(['D',1]);
         testBoard.checkHit(['D',2]);
         expect(testBoard.checkFleetSunk()).toBe(true);
-    })
+    });
     test('if misses are logged properly', () => {
         testBoard.checkHit(['E',5]);
         expect(testBoard.checkMisses()).toEqual([['E',5]]);
-    })
-})
+    });
+});
 
+
+// tests for createPlayer 
+test('if name stored properly', () => {
+    expect(testPlayer.getName()).toBe('Test');
+});
+test('log a hit and see if stored', () => {
+    testPlayer.logPlayerAttack(['J',1]);
+    expect(testPlayer.getHitsMadeByThisPlayer()).toEqual([['J',1]]);
+});
+test('if init fleet sunk status reported as false', () => {
+    expect(testPlayer.getFleetStatus()).toBe(false);
+});
+test('if misses logged accurately in gameboard', () => {
+    testPlayer.receiveHit(['A',1]);
+    expect(testPlayer.getPlayerMisses()).toEqual([['A',1]]);
+});
+test('if fleet sinks properly', () => {
+    testPlayer.receiveHit(['G',7]);
+    testPlayer.receiveHit(['H',7]);
+    testPlayer.receiveHit(['I',10]);
+    testPlayer.receiveHit(['J',10]);
+    expect(testPlayer.getFleetStatus()).toBe(true);
+});
+test('that true hits not stored in gameboard miss array', () => {
+    expect(testPlayer.getPlayerMisses()).toEqual([['A',1]]);
+});

@@ -44,14 +44,14 @@ export function getCoords(shipLength, firstCoord, orientation) {
   let coords = [firstCoord];
   
   if (orientation === 'horizontal') {
-    if ((firstCoord[1] + shipLength) > 10) return null;
+    if ((firstCoord[1] + shipLength-1) > 10) return null;
     for (let i = 1; i < shipLength; i++) {
       coords.push([firstCoord[0], firstCoord[1]+i]);
     }
   } else { // orientation = 'vertical'
     const coordCharCode = firstCoord[0].charCodeAt();
     // 74 is J in below if statement
-    if ((coordCharCode + shipLength) > 74) return null;
+    if ((coordCharCode + shipLength-1) > 74) return null;
     for (let i = 1; i < shipLength; i++) {
       coords.push([String.fromCharCode(coordCharCode+i),firstCoord[1]]);
     }
@@ -111,29 +111,73 @@ export const gameboardFactory = () => {
     return missArray;
   }
 
-  return {placeShip, checkFleetSunk, checkHit, checkMisses};
+  const getShips = function() {
+    return shipArray;
+  }
+
+  return {placeShip, checkFleetSunk, checkHit, checkMisses, getShips};
 }
 
-// create a gameboard factory
-// a 10 x 10 board
-  // vertical coordinates are A - J
-  // horizontal are 1 - 10
-  // An array of objects:
-    // each object lists:
-      // ship type
-      // owner
-      // coordinates it occupies
+
+export const createPlayer = function(name, type) {
+  // type is either 'human' or 'computer'
+  const playerName = name;
+  const shotsMadeByPlayer = [];
+  const playerBoard = gameboardFactory();
+
+  // temporary - players will place their own ships eventually
+  // playerBoard.placeShip(shipFactory(5), ['A',1], 'horizontal');
+  // playerBoard.placeShip(shipFactory(4), ['C',1], 'horizontal');
+  // playerBoard.placeShip(shipFactory(3), ['E',5], 'vertical');
+  playerBoard.placeShip(shipFactory(2), ['G',7], 'vertical');
+  playerBoard.placeShip(shipFactory(2), ['I',10], 'vertical');
+
+  const receiveHit = function(hitCoords) {
+    playerBoard.checkHit(hitCoords);
+  }
+  
+  const logPlayerAttack = function(attackCoords) {
+    shotsMadeByPlayer.push(attackCoords);
+  }
+
+  const getBoard = function() {
+    return playerBoard;
+  }
+
+  const getName = function() {
+    return playerName;
+  }
+
+  const getHitsMadeByThisPlayer = function() {
+    return shotsMadeByPlayer;
+  }
+
+  const getFleetStatus = function() {
+    return playerBoard.checkFleetSunk();
+  }
+
+  const getPlayerMisses = function() {
+    return playerBoard.checkMisses();
+  }
+
+  // AI logic 
+    // generate random move
+    // check if random move is in shotsMadeByPlayer
+      // if true, gen new move
+      // if false, attack other player
+    // special logic for if a hit is made, checks surrounding squares
+      // hit made - gen's array of moves to do - does them one by one
+    // 
+  
+  return { getName, getHitsMadeByThisPlayer, receiveHit, logPlayerAttack, getBoard, getFleetStatus, getPlayerMisses};
+}
+
+
+
 // the following ships 
-    // carrier len=5
-    // battleship len=4
-    // destroyer len=3
-    // sub len=2
-    // torpedo boat len=2
-// "gameboards should be able to place ships at specific coordinates by calling the ship factory function"
-    // select a coordinate
-    // default 
-// hit function: 
-    // take coordinates
-    // check array of ships (which contains ship coordinates)
-    // if a hit, hit. if miss, miss
-// function that reports if all of the players ships have been sunk
+  // carrier len=5
+  // battleship len=4
+  // destroyer len=3
+  // sub len=2
+  // torpedo boat len=2
+// if successful hit, hitting player gets another turn
