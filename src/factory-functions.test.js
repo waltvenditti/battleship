@@ -1,12 +1,14 @@
-import { shipFactory, getCoords } from './factory-functions.js';
+import { shipFactory, getCoords, gameboardFactory, checkArrayEquality } from './factory-functions.js';
 
 let testShip;
 let testShipFail;
+let testBoard;
 
 // tests for shipFactory
 beforeAll(() => {
     testShip = shipFactory(3);
     testShipFail = shipFactory(6);
+    testBoard = gameboardFactory();
 });
 
 test('confirm ship not made if wrong size submitted', () => {
@@ -57,10 +59,10 @@ describe('see if ship sinks after two more hits', () => {
 
 // tests for getCoords
 test('eval the getCoords function horizontally', () => {
-    expect(getCoords(2, ['A',1],'horizontal')).toEqual([['A',2],['A',3]]);
+    expect(getCoords(2, ['A',1],'horizontal')).toEqual([['A',1],['A',2]]);
 })
 test('eval the getCoords function vertically', () => {
-    expect(getCoords(2, ['A',1],'vertical')).toEqual([['B',1],['C',1]]);
+    expect(getCoords(2, ['A',1],'vertical')).toEqual([['A',1],['B',1]]);
 })
 test('see if horizontal fail returns null', () => {
     expect(getCoords(2, ['A',9],'horizontal')).toEqual(null);
@@ -68,3 +70,45 @@ test('see if horizontal fail returns null', () => {
 test('see if vertical fail returns null', () => {
     expect(getCoords(2, ['I',1],'vertical')).toEqual(null);
 })
+
+
+// test checkArrayEquality
+test('if checkArrayEquality returns true for identical arrays', () => {
+    expect(checkArrayEquality(['A',1], ['A',1])).toBe(true);
+});
+test('if checkArrayEquality returns false for different arrays', () => {
+    expect(checkArrayEquality(['A',1], ['A',2])).toBe(false);
+});
+
+
+// tests for gameboard
+test('evaluate if checkFleetSunk returns null at init', () => {
+    expect(testBoard.checkFleetSunk()).toBe(null);
+});
+
+describe('will place ships on gameboard', () => {
+    beforeAll(() => {
+        testBoard.placeShip(shipFactory(3), ['A',1], 'horizontal');
+        testBoard.placeShip(shipFactory(2), ['D',1], 'horizontal');
+    });
+
+    test('see if checkFleetSunk returns false', () => {
+        expect(testBoard.checkFleetSunk()).toBe(false);
+    });
+    test('if sinking one ship means checkFleetSunk returns false', () => {
+        testBoard.checkHit(['A',1]);
+        testBoard.checkHit(['A',2]);
+        testBoard.checkHit(['A',3]);
+        expect(testBoard.checkFleetSunk()).toBe(false);
+    });
+    test('if sinking both ships returns true from checkFleetSunk', () => {
+        testBoard.checkHit(['D',1]);
+        testBoard.checkHit(['D',2]);
+        expect(testBoard.checkFleetSunk()).toBe(true);
+    })
+    test('if misses are logged properly', () => {
+        testBoard.checkHit(['E',5]);
+        expect(testBoard.checkMisses()).toEqual([['E',5]]);
+    })
+})
+

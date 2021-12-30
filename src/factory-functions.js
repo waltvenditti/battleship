@@ -36,61 +36,82 @@ export const shipFactory = (length) => {
   return {getLength, getHitStatus, getSunkStatus, hit};
 };
 
+
 export function getCoords(shipLength, firstCoord, orientation) {
   // first coord is something like ['C',5]
   // valid coords are A-J, 1-10
   // orientation is either 'vertical' or 'horizontal' 
-  let coords = [];
+  let coords = [firstCoord];
   
   if (orientation === 'horizontal') {
     if ((firstCoord[1] + shipLength) > 10) return null;
-    for (let i = 1; i <= shipLength; i++) {
+    for (let i = 1; i < shipLength; i++) {
       coords.push([firstCoord[0], firstCoord[1]+i]);
     }
   } else { // orientation = 'vertical'
     const coordCharCode = firstCoord[0].charCodeAt();
     // 74 is J in below if statement
     if ((coordCharCode + shipLength) > 74) return null;
-    for (let i = 1; i <= shipLength; i++) {
+    for (let i = 1; i < shipLength; i++) {
       coords.push([String.fromCharCode(coordCharCode+i),firstCoord[1]]);
     }
   }
   return coords;
 }
 
+export function checkArrayEquality(arr1, arr2) {
+  if (arr1.length !== arr2.length) return false;
+  for (let i = 0; i < arr1.length; i++) {
+    if (arr1[i] !== arr2[i]) return false;
+  }
+  return true;
+}
 
 export const gameboardFactory = () => {
   const shipArray = [];
+  const missArray = [];
 
   const placeShip = function(shipObj, firstCoord, orientation) {
-    const shipCoords = getCoords;
+    const shipCoords = getCoords(shipObj.getLength(), firstCoord, orientation);
     const boardShipObj = {
       ship: shipObj,
       coords: shipCoords,
     }
-    shipArray.push(boardShipObject);
+    shipArray.push(boardShipObj);
   }
 
   const checkFleetSunk = () => {
+    if (shipArray.length === 0) return null;
     for (let i = 0; i < shipArray.length; i++) {
-      if (shipArray.ship.getSunkStatus() === false) {
+      if (shipArray[i].ship.getSunkStatus() === false) {
         return false;
       }
     }
     return true;
   }
 
-  const checkHit = function(hitCoords) {
-    for (let i = 0; i < shipArray.length; i++) {
-      if (shipArray[i].coords.includes(hitCoords)) {
-        const hitLocation = shipArray[i].coords.indexOf(hitCoords); 
-        shipArray[i].ship.hit(hitCoords);
-      }
-    }
+  const logMiss = function(missCoord) {
+    missArray.push(missCoord);
   }
 
-  // not sure if this is all that's needed 
-  return {placeShip, checkFleetSunk, checkHit};
+  const checkHit = function(hitCoords) {
+    for (let i = 0; i < shipArray.length; i++) {
+      for (let j = 0; j < shipArray[i].coords.length; j++) {
+        if (checkArrayEquality(shipArray[i].coords[j], hitCoords)) {
+          shipArray[i].ship.hit(j);
+          return true;
+        }
+      }
+    }
+    logMiss(hitCoords);
+    return false;
+  }
+
+  const checkMisses = function() {
+    return missArray;
+  }
+
+  return {placeShip, checkFleetSunk, checkHit, checkMisses};
 }
 
 // create a gameboard factory
