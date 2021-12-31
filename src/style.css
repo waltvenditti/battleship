@@ -1,0 +1,39 @@
+* {
+    border: 2px solid black;
+}
+
+header {
+    display: flex;
+    flex-direction: column;
+}
+
+header h1,
+header h2 {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+.row {
+    display: flex;
+}
+
+.square {
+    background-color: darkolivegreen;
+    height: 36px;
+    width: 36px;
+    border: 1px solid black;
+}
+
+#placement-options {
+    display: flex;
+    
+}
+
+#placement-board {
+    display: flex;
+    flex-direction: row;
+}

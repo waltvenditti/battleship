@@ -1,9 +1,27 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8"/>
-    <title><%= htmlWebpackPlugin.options.title %></title>
-  </head>
-  <body>
-  </body>
+
+<head>
+  <meta charset="utf-8" />
+  <title>
+    <%= htmlWebpackPlugin.options.title %>
+  </title>
+</head>
+
+<body>
+  <header>
+    <h1>BattleShip</h1>
+    <h2>Player vs. AI</h2>
+  </header>
+  <div id='main'>
+    <div id='placement-board'>
+      <div id='board'>
+      </div>
+      <div id='placement-options'>
+        <span>Place:</span><span id='ship-name'>Carrier</span>
+      </div>
+    </div>
+  </div>
+</body>
+
 </html>

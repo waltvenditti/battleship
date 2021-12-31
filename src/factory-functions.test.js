@@ -4,6 +4,7 @@ let testShip;
 let testShipFail;
 let testBoard;
 let testPlayer;
+let testPlayerRandom;
 
 // tests for shipFactory
 beforeAll(() => {
@@ -11,6 +12,7 @@ beforeAll(() => {
     testShipFail = shipFactory(6);
     testBoard = gameboardFactory();
     testPlayer = createPlayer('Test', 'human');
+    testPlayerRandom = createPlayer('Random', 'human');
 });
 
 test('confirm ship not made if wrong size submitted', () => {
@@ -123,6 +125,12 @@ test('log a hit and see if stored', () => {
     testPlayer.logPlayerAttack(['J',1]);
     expect(testPlayer.getHitsMadeByThisPlayer()).toEqual([['J',1]]);
 });
+test('test if checkLegalMove rejects another J1', () => {
+    expect(testPlayer.checkLegalMove(['J',1])).toBe(false);
+});
+test('test if checkLegalMove returns true for valid move', () => {
+    expect(testPlayer.checkLegalMove(['C',9])).toBe(true);
+});
 test('if init fleet sunk status reported as false', () => {
     expect(testPlayer.getFleetStatus()).toBe(false);
 });
@@ -139,4 +147,26 @@ test('if fleet sinks properly', () => {
 });
 test('that true hits not stored in gameboard miss array', () => {
     expect(testPlayer.getPlayerMisses()).toEqual([['A',1]]);
+});
+
+
+// tests for random move generator functions 
+test('tests if AI can distinguish valid from invalid moves', () => {
+    const coord1 = ['A','B','C','D','E','F','G','H','I','J'];
+    for (let i = 0; i < 9; i++) {
+        for (let j = 0; j < 10; j++) {
+            testPlayerRandom.logPlayerAttack([
+                coord1[i],j+1
+            ]);
+        }
+    }
+    for (let i = 9; i < 10; i++) {
+        for (let j = 0; j < 9; j++) {
+            testPlayerRandom.logPlayerAttack([
+                coord1[i],j+1
+            ]);
+        }
+    }
+    const randomMove = testPlayerRandom.genValidMove();
+    expect(randomMove).toEqual(['J',10]);
 });

@@ -119,13 +119,14 @@ export const gameboardFactory = () => {
 }
 
 
-export const createPlayer = function(name, type) {
+export const createPlayer = function(name) {
   // type is either 'human' or 'computer'
   const playerName = name;
+
   const shotsMadeByPlayer = [];
   const playerBoard = gameboardFactory();
 
-  // temporary - players will place their own ships eventually
+  // temporary
   // playerBoard.placeShip(shipFactory(5), ['A',1], 'horizontal');
   // playerBoard.placeShip(shipFactory(4), ['C',1], 'horizontal');
   // playerBoard.placeShip(shipFactory(3), ['E',5], 'vertical');
@@ -138,10 +139,6 @@ export const createPlayer = function(name, type) {
   
   const logPlayerAttack = function(attackCoords) {
     shotsMadeByPlayer.push(attackCoords);
-  }
-
-  const getBoard = function() {
-    return playerBoard;
   }
 
   const getName = function() {
@@ -160,16 +157,44 @@ export const createPlayer = function(name, type) {
     return playerBoard.checkMisses();
   }
 
+  const genRandomNum = function() {
+    // generates a random number 0 - 9
+    return Math.floor(Math.random()*10);
+  }
+
+  const genRandomCoord = function() {
+    const firstCoord = [
+      'A','B','C','D','E','F','G','H','I','J'
+    ]
+    return [firstCoord[genRandomNum()],(genRandomNum()+1)];
+  }
+
+  const checkLegalMove = function (moveCoords) {
+    for (let i = 0; i < shotsMadeByPlayer.length; i++) {
+      if (checkArrayEquality(shotsMadeByPlayer[i], moveCoords)) {
+        return false;
+      }
+    }
+    return true; 
+  }
+
+  const genValidMove = function() {
+    let randomMove = genRandomCoord();
+    while (true) {
+      if (checkLegalMove(randomMove)) {
+        break;
+      } else {
+        randomMove = genRandomCoord();
+      }
+    }
+    return randomMove;
+  }
   // AI logic 
-    // generate random move
-    // check if random move is in shotsMadeByPlayer
-      // if true, gen new move
-      // if false, attack other player
     // special logic for if a hit is made, checks surrounding squares
       // hit made - gen's array of moves to do - does them one by one
     // 
   
-  return { getName, getHitsMadeByThisPlayer, receiveHit, logPlayerAttack, getBoard, getFleetStatus, getPlayerMisses};
+  return { getName, getHitsMadeByThisPlayer, receiveHit, logPlayerAttack, getFleetStatus, getPlayerMisses, checkLegalMove, genValidMove };
 }
 
 
