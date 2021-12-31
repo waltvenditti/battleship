@@ -15,10 +15,19 @@
   </header>
   <div id='main'>
     <div id='placement-board'>
-      <div id='board'>
-      </div>
-      <div id='placement-options'>
-        <span>Place:</span><span id='ship-name'>Carrier</span>
+      <div class='horiz-flex-div'>
+        <div id='board'>
+        </div>
+        <div id='placement-options'>
+          <div class='vert-flex-div'>
+            <div>
+              <span>Place </span>
+              <span id='ship-name'>Carrier</span>
+            </div>
+            <button id='rotate-button' class='horizontal'>Rotate Ship</button>
+            <button>Reset Ships</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

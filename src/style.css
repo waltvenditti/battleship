@@ -19,6 +19,8 @@ h2 {
 
 .row {
     display: flex;
+    border-top: 0;
+    border-bottom: 0;
 }
 
 .square {
@@ -28,12 +30,37 @@ h2 {
     border: 1px solid black;
 }
 
-#placement-options {
-    display: flex;
-    
+.ship-square {
+    background-color: dimgrey;
+    height: 36px;
+    width: 36px;
+    border: 1px solid black;
+}
+
+.coord-square {
+    text-align: center;
+    height: 36px;
+    line-height: 36px;
+    width: 36px;
+    border: 1px solid black;
 }
 
 #placement-board {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+#placement-options {
+   width: 180px;
+}
+
+.vert-flex-div {
+    display: flex;
+    flex-direction: column;
+}
+
+.horiz-flex-div {
     display: flex;
     flex-direction: row;
 }
