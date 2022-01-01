@@ -1,15 +1,22 @@
+import { startGame } from "./game-loop";
+
 // module to store coordinates for access by main loop
 export const coordsStorage = (() => {
   const coords = [];
+  const orientations = [];
   const storeCoords = (row, square) => {
     let properCoord = convIDtoCoord(row, square);
     coords.push(properCoord);
-  }
+  };
+  const storeOrientation = (orien) => {
+    orientations.push(orien);
+  };
   const getCoords = () => coords;
+  const getOrientations = () => orientations;
   const clearCoords = () => {
     while (coords.length > 0) coords.pop();
-  }
-  return { storeCoords, getCoords, clearCoords };
+  };
+  return { storeCoords, getCoords, clearCoords, storeOrientation, getOrientations };
 })();
 
 export const genPlacementBoard = function () {
@@ -63,15 +70,15 @@ export const addButtonFunctionality = function () {
       btnRotate.classList.add("horizontal");
     }
   });
-  
+
   btnReset.addEventListener("click", () => {
     const board = document.querySelector("#board");
-    const shipName = document.querySelector('#ship-name');
+    const shipName = document.querySelector("#ship-name");
     while (board.lastChild) {
       board.removeChild(board.lastChild);
     }
     genPlacementBoard();
-    shipName.textContent = 'Carrier';
+    shipName.textContent = "Carrier";
     coordsStorage.clearCoords();
   });
 };
@@ -87,6 +94,12 @@ function getShipLength() {
   return 1;
 }
 
+function getOrientation() {
+  const btnRotate = document.querySelector("#rotate-button");
+  if (btnRotate.classList.contains("horizontal")) return "horizontal";
+  if (btnRotate.classList.contains("vertical")) return "vertical";
+}
+
 function hoverOnPlacementSquare(inputID) {
   let squareID;
   if (typeof inputID === "object") squareID = this.id;
@@ -99,16 +112,15 @@ function hoverOnPlacementSquare(inputID) {
 
   if (btnRotate.classList.contains("horizontal")) {
     let color;
-    if (checkIfValidPlacement(rowNum, sqNum)) color = "darkseagreen";
+    if (checkIfValidPlacement(getShipLength(), rowNum, sqNum, getOrientation())) color = "darkseagreen";
     else color = "mistyrose";
     for (let i = sqNum; i < sqNum + len && i < 10; i++) {
       let square = document.querySelector(`#sq${rowNum}${i}`);
       square.style["background-color"] = color;
     }
-
   } else if (btnRotate.classList.contains("vertical")) {
     let color;
-    if (checkIfValidPlacement(rowNum, sqNum)) color = "darkseagreen";
+    if (checkIfValidPlacement(getShipLength(), rowNum, sqNum, getOrientation())) color = "darkseagreen";
     else color = "mistyrose";
     for (let i = rowNum; i < rowNum + len && i < 10; i++) {
       let square = document.querySelector(`#sq${i}${sqNum}`);
@@ -123,7 +135,8 @@ function hoverOffPlacementSquare() {
   let sqNum = parseInt(squareID[3]);
   let len = getShipLength();
   let btnRotate = document.querySelector("#rotate-button");
-  if (btnRotate.classList.contains("horizontal")) {
+  let orientation = getOrientation();
+  if (orientation === 'horizontal') {
     for (let i = sqNum; i < sqNum + len; i++) {
       let square = document.querySelector(`#sq${rowNum}${i}`);
       if (square === null) return;
@@ -133,7 +146,7 @@ function hoverOffPlacementSquare() {
         square.style["background-color"] = "darkolivegreen";
       }
     }
-  } else if (btnRotate.classList.contains("vertical")) {
+  } else if (orientation === 'vertical') {
     for (let i = rowNum; i < rowNum + len && i < 10; i++) {
       let square = document.querySelector(`#sq${i}${sqNum}`);
       if (square.classList.contains("ship-square")) {
@@ -155,27 +168,21 @@ function incrementShipName() {
   if (name === "Torpedo Boat") return null;
 }
 
-function checkIfValidPlacement(row, square) {
-  const len = getShipLength();
-  const btnRotate = document.querySelector("#rotate-button");
-  let orientation;
-  if (btnRotate.classList.contains("horizontal")) {
-    orientation = "horizontal";
-  } else orientation = "vertical";
+function checkIfValidPlacement(len, row, square, orientation) {
   if (orientation === "horizontal") {
     if (square + len - 1 >= 10) return false;
     for (let i = square; i < square + len; i++) {
       let sq = document.querySelector(`#sq${row}${i}`);
-      if (sq.classList.contains('ship-square')) {
+      if (sq.classList.contains("ship-square")) {
         return false;
       }
     }
   }
-  if (orientation === "vertical") { 
+  if (orientation === "vertical") {
     if (row + len - 1 >= 10) return false;
     for (let i = row; i < row + len; i++) {
       let sq = document.querySelector(`#sq${i}${square}`);
-      if (sq.classList.contains('ship-square')) {
+      if (sq.classList.contains("ship-square")) {
         return false;
       }
     }
@@ -184,15 +191,18 @@ function checkIfValidPlacement(row, square) {
 }
 
 function convIDtoCoord(row, square) {
-  const firstCoord = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
-  return [firstCoord[row], square+1];
+  const firstCoord = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+  return [firstCoord[row], square + 1];
 }
 
 function clickPlacementSquare() {
   const squareID = this.id;
   let rowNum = parseInt(squareID[2]);
   let sqNum = parseInt(squareID[3]);
-  if (!checkIfValidPlacement(rowNum, sqNum)) return;
+  if (!checkIfValidPlacement(getShipLength(), rowNum, sqNum, getOrientation())) return;
+  if (coordsStorage.getCoords().length === 5) {
+    return;
+  }
 
   const spanShipName = document.querySelector("#ship-name");
   spanShipName.textContent = incrementShipName();
@@ -210,12 +220,10 @@ function clickPlacementSquare() {
   }
   hoverOnPlacementSquare(this.id);
   coordsStorage.storeCoords(rowNum, sqNum);
+  coordsStorage.storeOrientation(getOrientation());
   if (coordsStorage.getCoords().length === 5) {
-    // start the game
+    startGame();
   }
-  console.log(coordsStorage.getCoords());
-}
-
-export const startGame = function() {
-  // arf 
+  // console.log(coordsStorage.getCoords());
+  // console.log(coordsStorage.getOrientations());
 }

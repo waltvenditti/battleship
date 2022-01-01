@@ -11,8 +11,10 @@ beforeAll(() => {
     testShip = shipFactory(3);
     testShipFail = shipFactory(6);
     testBoard = gameboardFactory();
-    testPlayer = createPlayer('Test', 'human');
-    testPlayerRandom = createPlayer('Random', 'human');
+    testPlayer = createPlayer('human');
+    testPlayerRandom = createPlayer('human');
+    testPlayer.storeShip(2, ['G',7], 'vertical');
+    testPlayer.storeShip(2, ['I',10], 'vertical');
 });
 
 test('confirm ship not made if wrong size submitted', () => {
@@ -119,7 +121,7 @@ describe('will place ships on gameboard', () => {
 
 // tests for createPlayer 
 test('if name stored properly', () => {
-    expect(testPlayer.getName()).toBe('Test');
+    expect(testPlayer.getName()).toBe('human');
 });
 test('log a hit and see if stored', () => {
     testPlayer.logPlayerAttack(['J',1]);

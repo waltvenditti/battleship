@@ -4,6 +4,5 @@ import './style.css';
 
 genPlacementBoard();
 addButtonFunctionality();
-const player = createPlayer('human');
-const AI = createPlayer('computer');
+
 
