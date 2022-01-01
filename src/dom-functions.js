@@ -1,12 +1,28 @@
+// module to store coordinates for access by main loop
+export const coordsStorage = (() => {
+  const coords = [];
+  const storeCoords = (row, square) => {
+    let properCoord = convIDtoCoord(row, square);
+    coords.push(properCoord);
+  }
+  const getCoords = () => coords;
+  const clearCoords = () => {
+    while (coords.length > 0) coords.pop();
+  }
+  return { storeCoords, getCoords, clearCoords };
+})();
+
 export const genPlacementBoard = function () {
   const board = document.querySelector("#board");
   const divCoordRow = document.createElement("div");
   const divSquareBlank = document.createElement("div");
-  const btnRotate = document.querySelector("#rotate-button");
+
   divCoordRow.classList.add("row");
   divSquareBlank.classList.add("coord-square");
+
   divCoordRow.appendChild(divSquareBlank);
   board.appendChild(divCoordRow);
+
   for (let i = 0; i < 10; i++) {
     const coords = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
     let divRow = document.createElement("div");
@@ -32,6 +48,11 @@ export const genPlacementBoard = function () {
       divRow.appendChild(divSquare);
     }
   }
+};
+
+export const addButtonFunctionality = function () {
+  const btnRotate = document.querySelector("#rotate-button");
+  const btnReset = document.querySelector("#reset-button");
 
   btnRotate.addEventListener("click", () => {
     if (btnRotate.classList.contains("horizontal")) {
@@ -41,6 +62,17 @@ export const genPlacementBoard = function () {
       btnRotate.classList.remove("vertical");
       btnRotate.classList.add("horizontal");
     }
+  });
+  
+  btnReset.addEventListener("click", () => {
+    const board = document.querySelector("#board");
+    const shipName = document.querySelector('#ship-name');
+    while (board.lastChild) {
+      board.removeChild(board.lastChild);
+    }
+    genPlacementBoard();
+    shipName.textContent = 'Carrier';
+    coordsStorage.clearCoords();
   });
 };
 
@@ -52,6 +84,7 @@ function getShipLength() {
   if (name === "Destroyer") return 3;
   if (name === "Submarine") return 2;
   if (name === "Torpedo Boat") return 2;
+  return 1;
 }
 
 function hoverOnPlacementSquare(inputID) {
@@ -61,22 +94,23 @@ function hoverOnPlacementSquare(inputID) {
   let rowNum = parseInt(squareID[2]);
   let sqNum = parseInt(squareID[3]);
   let len = getShipLength();
+  if (len === 1) return;
   let btnRotate = document.querySelector("#rotate-button");
+
   if (btnRotate.classList.contains("horizontal")) {
+    let color;
+    if (checkIfValidPlacement(rowNum, sqNum)) color = "darkseagreen";
+    else color = "mistyrose";
     for (let i = sqNum; i < sqNum + len && i < 10; i++) {
-      let color;
-      if (sqNum + (len - 1) >= 10) color = "mistyrose";
-      else color = "darkseagreen";
-      if (i === 10) return;
       let square = document.querySelector(`#sq${rowNum}${i}`);
       square.style["background-color"] = color;
     }
+
   } else if (btnRotate.classList.contains("vertical")) {
+    let color;
+    if (checkIfValidPlacement(rowNum, sqNum)) color = "darkseagreen";
+    else color = "mistyrose";
     for (let i = rowNum; i < rowNum + len && i < 10; i++) {
-      let color;
-      if (rowNum + (len - 1) >= 10) color = "mistyrose";
-      else color = "darkseagreen";
-      if (i === 10) return;
       let square = document.querySelector(`#sq${i}${sqNum}`);
       square.style["background-color"] = color;
     }
@@ -93,7 +127,7 @@ function hoverOffPlacementSquare() {
     for (let i = sqNum; i < sqNum + len; i++) {
       let square = document.querySelector(`#sq${rowNum}${i}`);
       if (square === null) return;
-      if (square.classList.includes("ship-square")) {
+      if (square.classList.contains("ship-square")) {
         square.style["background-color"] = "dimgrey";
       } else {
         square.style["background-color"] = "darkolivegreen";
@@ -102,7 +136,11 @@ function hoverOffPlacementSquare() {
   } else if (btnRotate.classList.contains("vertical")) {
     for (let i = rowNum; i < rowNum + len && i < 10; i++) {
       let square = document.querySelector(`#sq${i}${sqNum}`);
-      square.style["background-color"] = "darkolivegreen";
+      if (square.classList.contains("ship-square")) {
+        square.style["background-color"] = "dimgrey";
+      } else {
+        square.style["background-color"] = "darkolivegreen";
+      }
     }
   }
 }
@@ -124,22 +162,38 @@ function checkIfValidPlacement(row, square) {
   if (btnRotate.classList.contains("horizontal")) {
     orientation = "horizontal";
   } else orientation = "vertical";
-  if (orientation === "horizontal" && square + len - 1 >= 10) {
-    return false;
+  if (orientation === "horizontal") {
+    if (square + len - 1 >= 10) return false;
+    for (let i = square; i < square + len; i++) {
+      let sq = document.querySelector(`#sq${row}${i}`);
+      if (sq.classList.contains('ship-square')) {
+        return false;
+      }
+    }
   }
-  if (orientation === "vertical" && row + len - 1 >= 10) {
-    return false;
+  if (orientation === "vertical") { 
+    if (row + len - 1 >= 10) return false;
+    for (let i = row; i < row + len; i++) {
+      let sq = document.querySelector(`#sq${i}${square}`);
+      if (sq.classList.contains('ship-square')) {
+        return false;
+      }
+    }
   }
   return true;
+}
+
+function convIDtoCoord(row, square) {
+  const firstCoord = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+  return [firstCoord[row], square+1];
 }
 
 function clickPlacementSquare() {
   const squareID = this.id;
   let rowNum = parseInt(squareID[2]);
   let sqNum = parseInt(squareID[3]);
-  if (checkIfValidPlacement(rowNum, sqNum) === false) return;
+  if (!checkIfValidPlacement(rowNum, sqNum)) return;
 
-  // get highlighted squares and add new class to them
   const spanShipName = document.querySelector("#ship-name");
   spanShipName.textContent = incrementShipName();
   const squares = document.querySelectorAll(".square");
@@ -155,8 +209,13 @@ function clickPlacementSquare() {
     newSquares[i].style["background-color"] = "darkolivegreen";
   }
   hoverOnPlacementSquare(this.id);
+  coordsStorage.storeCoords(rowNum, sqNum);
+  if (coordsStorage.getCoords().length === 5) {
+    // start the game
+  }
+  console.log(coordsStorage.getCoords());
 }
 
-export const pendingFunc = function () {
-  // tbd
-};
+export const startGame = function() {
+  // arf 
+}
