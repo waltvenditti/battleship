@@ -1,3 +1,4 @@
+import { convIDtoCoord } from './dom-functions.js';
 import { shipFactory, getCoords, gameboardFactory, checkArrayEquality, createPlayer } from './factory-functions.js';
 
 let testShip;
@@ -5,6 +6,7 @@ let testShipFail;
 let testBoard;
 let testPlayer;
 let testPlayerRandom;
+let testComputer;
 
 // tests for shipFactory
 beforeAll(() => {
@@ -13,6 +15,7 @@ beforeAll(() => {
     testBoard = gameboardFactory();
     testPlayer = createPlayer('human');
     testPlayerRandom = createPlayer('human');
+    testComputer = createPlayer('computer');
     testPlayer.storeShip(2, ['G',7], 'vertical');
     testPlayer.storeShip(2, ['I',10], 'vertical');
 });
@@ -171,4 +174,10 @@ test('tests if AI can distinguish valid from invalid moves', () => {
     }
     const randomMove = testPlayerRandom.genValidMove();
     expect(randomMove).toEqual(['J',10]);
+});
+
+// test the AI for generating ship placements for AI
+test('test AI ship placement', () => {
+    testComputer.AIGenPlacements();
+    expect(testComputer.testAIGenPlacements()).toBe(true);
 });

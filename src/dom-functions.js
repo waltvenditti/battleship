@@ -1,3 +1,4 @@
+import { doc } from "prettier";
 import { startGame } from "./game-loop";
 
 // module to store coordinates for access by main loop
@@ -16,7 +17,13 @@ export const coordsStorage = (() => {
   const clearCoords = () => {
     while (coords.length > 0) coords.pop();
   };
-  return { storeCoords, getCoords, clearCoords, storeOrientation, getOrientations };
+  return {
+    storeCoords,
+    getCoords,
+    clearCoords,
+    storeOrientation,
+    getOrientations,
+  };
 })();
 
 export const genPlacementBoard = function () {
@@ -112,7 +119,8 @@ function hoverOnPlacementSquare(inputID) {
 
   if (btnRotate.classList.contains("horizontal")) {
     let color;
-    if (checkIfValidPlacement(getShipLength(), rowNum, sqNum, getOrientation())) color = "darkseagreen";
+    if (checkIfValidPlacement(getShipLength(), rowNum, sqNum, getOrientation()))
+      color = "darkseagreen";
     else color = "mistyrose";
     for (let i = sqNum; i < sqNum + len && i < 10; i++) {
       let square = document.querySelector(`#sq${rowNum}${i}`);
@@ -120,7 +128,8 @@ function hoverOnPlacementSquare(inputID) {
     }
   } else if (btnRotate.classList.contains("vertical")) {
     let color;
-    if (checkIfValidPlacement(getShipLength(), rowNum, sqNum, getOrientation())) color = "darkseagreen";
+    if (checkIfValidPlacement(getShipLength(), rowNum, sqNum, getOrientation()))
+      color = "darkseagreen";
     else color = "mistyrose";
     for (let i = rowNum; i < rowNum + len && i < 10; i++) {
       let square = document.querySelector(`#sq${i}${sqNum}`);
@@ -136,7 +145,7 @@ function hoverOffPlacementSquare() {
   let len = getShipLength();
   let btnRotate = document.querySelector("#rotate-button");
   let orientation = getOrientation();
-  if (orientation === 'horizontal') {
+  if (orientation === "horizontal") {
     for (let i = sqNum; i < sqNum + len; i++) {
       let square = document.querySelector(`#sq${rowNum}${i}`);
       if (square === null) return;
@@ -146,7 +155,7 @@ function hoverOffPlacementSquare() {
         square.style["background-color"] = "darkolivegreen";
       }
     }
-  } else if (orientation === 'vertical') {
+  } else if (orientation === "vertical") {
     for (let i = rowNum; i < rowNum + len && i < 10; i++) {
       let square = document.querySelector(`#sq${i}${sqNum}`);
       if (square.classList.contains("ship-square")) {
@@ -190,7 +199,7 @@ function checkIfValidPlacement(len, row, square, orientation) {
   return true;
 }
 
-function convIDtoCoord(row, square) {
+export function convIDtoCoord(row, square) {
   const firstCoord = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
   return [firstCoord[row], square + 1];
 }
@@ -199,7 +208,8 @@ function clickPlacementSquare() {
   const squareID = this.id;
   let rowNum = parseInt(squareID[2]);
   let sqNum = parseInt(squareID[3]);
-  if (!checkIfValidPlacement(getShipLength(), rowNum, sqNum, getOrientation())) return;
+  if (!checkIfValidPlacement(getShipLength(), rowNum, sqNum, getOrientation()))
+    return;
   if (coordsStorage.getCoords().length === 5) {
     return;
   }
@@ -225,3 +235,102 @@ function clickPlacementSquare() {
     startGame();
   }
 }
+
+export const removePlacementBoard = function () {
+  const divMain = document.querySelector("#main");
+  const divPlacement = document.querySelector("#placement-board");
+  divMain.removeChild(divPlacement);
+};
+
+const genShipBoards = function () {
+  const divPlayer = document.querySelector("#player");
+  const divComputer = document.querySelector("#computer");
+  const divPlayerCoordRow = document.createElement("div");
+  const divPlayerSquareBlank = document.createElement("div");
+  const divCompCoordRow = document.createElement("div");
+  const divCompSquareBlank = document.createElement("div");
+
+  divPlayerCoordRow.classList.add("row");
+  divPlayerSquareBlank.classList.add("coord-square");
+  divCompCoordRow.classList.add("row");
+  divCompSquareBlank.classList.add("coord-square");
+
+  divPlayerCoordRow.appendChild(divPlayerSquareBlank);
+  divCompCoordRow.appendChild(divPlayerSquareBlank);
+
+  // player board
+  divPlayer.appendChild(divPlayerCoordRow);
+  for (let i = 0; i < 10; i++) {
+    const coords = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+    let divRow = document.createElement("div");
+    divRow.classList.add("row");
+    divPlayer.appendChild(divRow);
+    for (let j = 0; j < 10; j++) {
+      if (j === 0) {
+        let divCoord = document.createElement("div");
+        let divCoordNum = document.createElement("div");
+        divCoord.classList.add("coord-square");
+        divCoordNum.classList.add("coord-square");
+        divCoord.textContent = `${coords[i]}`;
+        divCoordNum.textContent = `${i + 1}`;
+        divRow.appendChild(divCoord);
+        divPlayerCoordRow.appendChild(divCoordNum);
+      }
+      let divSquare = document.createElement("div");
+      divSquare.classList.add("square");
+      divSquare.setAttribute("id", `sq${i}${j}`);
+      divRow.appendChild(divSquare);
+    }
+  }
+
+  // computer board
+  divComputer.appendChild(divCompCoordRow);
+  for (let i = 0; i < 10; i++) {
+    const coords = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+    let divRow = document.createElement("div");
+    divRow.classList.add("row");
+    divComputer.appendChild(divRow);
+    for (let j = 0; j < 10; j++) {
+      if (j === 0) {
+        let divCoord = document.createElement("div");
+        let divCoordNum = document.createElement("div");
+        divCoord.classList.add("coord-square");
+        divCoordNum.classList.add("coord-square");
+        divCoord.textContent = `${coords[i]}`;
+        divCoordNum.textContent = `${i + 1}`;
+        divRow.appendChild(divCoord);
+        divCompCoordRow.appendChild(divCoordNum);
+      }
+      let divSquare = document.createElement("div");
+      divSquare.classList.add("square");
+      divSquare.setAttribute("id", `sq${i}${j}`);
+      divRow.appendChild(divSquare);
+    }
+  }
+};
+
+export const genGameBoard = function () {
+  const divMain = document.querySelector("#main");
+  const divGameBoard = document.createElement("div");
+  const divPlayer = document.createElement("div");
+  const divComputer = document.createElement("div");
+  const h3PlayerTitle = document.createElement("h3");
+  const h3ComputerTitle = document.createElement("h3");
+
+  divGameBoard.setAttribute("id", "game-div");
+  divPlayer.setAttribute("id", "player");
+  divComputer.setAttribute("id", "computer");
+  divPlayer.classList.add("player-div");
+  divComputer.classList.add("player-div");
+
+  h3PlayerTitle.textContent = "Player";
+  h3ComputerTitle.textContent = "Computer";
+
+  divMain.appendChild(divGameBoard);
+  divGameBoard.appendChild(divPlayer);
+  divPlayer.appendChild(h3PlayerTitle);
+  divGameBoard.appendChild(divComputer);
+  divComputer.appendChild(h3ComputerTitle);
+
+  genShipBoards();
+};

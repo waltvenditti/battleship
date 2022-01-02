@@ -1,5 +1,5 @@
 import { createPlayer } from './factory-functions';
-import { coordsStorage } from './dom-functions';
+import { coordsStorage, removePlacementBoard } from './dom-functions';
 
 export const arf = function() {
     // arf 
@@ -19,9 +19,24 @@ const createPlayerHuman = function() {
 const createPlayerComputer = function() {
     const computer = createPlayer('computer');
     computer.AIGenPlacements();
+    return computer;
 };
 
 export const startGame = function() {
     let player = createPlayerHuman();
     let computer = createPlayerComputer();
+    removePlacementBoard();
+    // remove placement board
+    // gen two new boards, smaller, side by side
+    // left one shows player's ship placements
+    // right one is a blank one reflecting AI chosen ship locations
+    // most of the below game logic will be in eventListeners
+    // player turn, they click on a square on computer side
+    // if miss, turn square grey and now is computer's turn
+    // if hit:
+        // turn square red
+        // check if fleet sunk
+            // if yes, game over
+            // if no, give that player another turn
+    // repeat until game over
 };
