@@ -159,16 +159,13 @@ export const createPlayer = function (name) {
     return playerBoard.checkMisses();
   };
 
-  const genRandomNum = function () {
-    // generates a random number 0 - 9
-    return Math.floor(Math.random() * 10);
-  };
-
   const genRandomCoord = function () {
     const firstCoord = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
-    return [firstCoord[genRandomNum()], genRandomNum() + 1];
+    return [firstCoord[Math.floor(Math.random() * 10)], Math.floor(Math.random() * 10) + 1];
   };
 
+  // checks that player has not already
+  // made this move
   const checkLegalMove = function (moveCoords) {
     for (let i = 0; i < shotsMadeByPlayer.length; i++) {
       if (checkArrayEquality(shotsMadeByPlayer[i], moveCoords)) {
@@ -178,6 +175,8 @@ export const createPlayer = function (name) {
     return true;
   };
 
+  // generates a random coordinate for AI and
+  // checks it using checkLegalMove
   const genValidMove = function () {
     let randomMove = genRandomCoord();
     while (true) {
@@ -190,6 +189,8 @@ export const createPlayer = function (name) {
     return randomMove;
   };
 
+  // makes coordinates numerical so they can be used
+  // by checkValidPlacement
   const convertLetterCoordsToID = function(coords) {
     const letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
     let firstCoord = coords[0];
@@ -197,36 +198,91 @@ export const createPlayer = function (name) {
     return [firstCoordNum, coords[1]];
   }
 
-  const checkValidPlacement = function() {
+  // generates a blank board of numerical coords
+  const genNumCoordBoard = function() {
     const board = [];
     for (let i = 0; i < 10; i++) {
       for (let j = 0; j < 10; j++) {
         board.push([i,j]);
       }
     }
-    // storeShip(5, ["C",6], 'vertical');
+    return board;
+  }
+
+  // used by checkValidPlacement to find locations 
+  // in AI's game board where ships are present
+  const getIndex = function(board, coord) {
+    for (let i = 0; i < board.length; i++) {
+      if (checkArrayEquality(board[i], coord)) return i;
+    }
+    return -1;
+  }
+
+  // works
+  // generates blank board
+  // gets coordinates for all ships currently 
+  // stored by AI
+  // marks the board where ships are currently placed
+  const checkValidPlacement = function() {
+    const board = genNumCoordBoard();
+    storeShip(5, ["C",6], 'vertical');
     const ships = playerBoard.getShips();
     for (let i = 0; i < ships.length; i++) {
       let ship = ships[i];
       let coords = ship.coords;
-      const newCoords = [];
       for (let j = 0; j < coords.length; j++) {
         let numCoord = convertLetterCoordsToID(coords[j]);
-        newCoords.push(numCoord)
+        let index = getIndex(board, numCoord);
+        if (index !== -1) {
+          board[index] = [null];
+        }
       }
     }
   }
 
+  const AIGenPlaceRandomShip = function() {
+    // generates a random coordinate pair plus 
+    // a randomly chosen orientation
+    const orients = ['horizontal', 'vertical'];
+    const row = Math.floor(Math.random()*10);
+    const square = Math.floor(Math.random()*10);
+    const coinFlip = Math.floor(Math.random()*2);
+    return [row, square, orients[coinFlip]];
+  }
+
+  const AIGenPlaceFullShipCoords = function(len, row, square, orient) {
+    const coordsArray = [];
+    if (orient === 'horizontal') {
+      if (square+len-1 > 9) return false;
+      for (let i = 0; i < len; i++) {
+        coordsArray.push([row, square+i]);
+      }
+    }
+    if (orient === 'vertical') {
+      if (row+len-1 > 9) return false;
+      for (let i = 0; i < len; i++) {
+        coordsArray.push([row+i,square]);
+      }
+    }
+    return coordsArray;
+}
+
   const AIGenPlacements = function() {
     const shipLengths = [5, 4, 3, 2, 2];
-    const oris = ['horizontal', 'vertical'];
     for (let i = 0; i < 5; i++) {
+      let len = shipLengths[i];
+      let shipCoords;
+      let j = 0;
       while (true) {
-        let row = genRandomNum();
-        let square = genRandomNum();
-        let len = shipLengths[i];
-        let ori = oris[Math.floor(Math.random()*2)];
-        break;
+        let randomShip = AIGenPlaceRandomShip();
+        let row = randomShip[0];
+        let square = randomShip[1];
+        let orient = randomShip[2];
+        shipCoords = AIGenPlaceFullShipCoords(len, row,square, orient);
+        console.log(shipCoords);
+        if (shipCoords !== false) break;
+        if (j > 1000) break;
+        j++;
       }
     }
     checkValidPlacement();

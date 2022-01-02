@@ -224,6 +224,4 @@ function clickPlacementSquare() {
   if (coordsStorage.getCoords().length === 5) {
     startGame();
   }
-  // console.log(coordsStorage.getCoords());
-  // console.log(coordsStorage.getOrientations());
 }
