@@ -37,6 +37,20 @@ h2 {
     border: 1px solid black;
 }
 
+.hover-square {
+    background-color: darkseagreen;
+    height: 36px;
+    width: 36px;
+    border: 1px solid black;
+}
+
+.invalid-hover-square {
+    background-color: mistyrose;
+    height: 36px;
+    width: 36px;
+    border: 1px solid black;
+}
+
 .coord-square {
     text-align: center;
     height: 36px;
@@ -77,4 +91,8 @@ h2 {
 .player-div {
     display: flex;
     flex-direction: column;
+}
+
+.player-div h3 {
+    text-align: center;
 }

@@ -200,7 +200,14 @@ export const createPlayer = function (name) {
     const letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
     let firstCoord = coords[0];
     let firstCoordNum = letters.indexOf(firstCoord);
-    return [firstCoordNum, coords[1]-1];
+    return [firstCoordNum, coords[1] - 1];
+  };
+
+  const getIndex = function (board, coord) {
+    for (let i = 0; i < board.length; i++) {
+      if (checkArrayEquality(board[i], coord)) return i;
+    }
+    return -1;
   };
 
   // generates a blank board of numerical coords
@@ -212,15 +219,6 @@ export const createPlayer = function (name) {
       }
     }
     return blankBoard;
-  };
-
-  // used by checkValidPlacement to find locations
-  // in AI's game board where ships are present
-  const getIndex = function (board, coord) {
-    for (let i = 0; i < board.length; i++) {
-      if (checkArrayEquality(board[i], coord)) return i;
-    }
-    return -1;
   };
 
   const AIGenPlaceGetCurrBoard = function () {
@@ -282,7 +280,7 @@ export const createPlayer = function (name) {
 
   // this randomly  generates five ship positions,
   // checks they are valid in terms of board and other
-  // ship locations, then stores them 
+  // ship locations, then stores them
   const AIGenPlacements = function () {
     const shipLengths = [5, 4, 3, 2, 2];
     for (let i = 0; i < 5; i++) {
@@ -312,15 +310,15 @@ export const createPlayer = function (name) {
   // hit made - gen's array of moves to do - does them one by one
   //
 
-  const testAIGenPlacements = function() {
+  const testAIGenPlacements = function () {
     const shipLengths = [5, 4, 3, 2, 2];
     // check ship count
     const shipCount = playerBoard.getShips().length;
-    if ( shipCount !== 5) return false;
+    if (shipCount !== 5) return false;
     const ships = playerBoard.getShips();
     // check ship lengths
     for (let i = 0; i < shipCount; i++) {
-      if (ships[i].ship.getLength() !== shipLengths[i]) { 
+      if (ships[i].ship.getLength() !== shipLengths[i]) {
         return false;
       }
     }
@@ -329,7 +327,7 @@ export const createPlayer = function (name) {
     for (let i = 0; i < shipCount; i++) {
       coordCount += ships[i].coords.length;
     }
-    if (coordCount !== 16) return false; 
+    if (coordCount !== 16) return false;
     // get an array of all coords occupied by the ships
     const allCoords = [];
     for (let i = 0; i < shipCount; i++) {
@@ -341,14 +339,14 @@ export const createPlayer = function (name) {
     for (let i = 0; i < allCoords.length; i++) {
       let occurrence = 0;
       for (let j = 0; j < allCoords.length; j++) {
-        if (checkArrayEquality(allCoords[i],allCoords[j])) {
-          occurrence++; 
+        if (checkArrayEquality(allCoords[i], allCoords[j])) {
+          occurrence++;
         }
       }
-      if (occurrence !== 1) return false
+      if (occurrence !== 1) return false;
     }
     // check that all coords are valid board coords
-    const letters = ["A","B","C","D","E","F","G","H","I","J"];
+    const letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
     for (let i = 0; i < allCoords.length; i++) {
       let letter = allCoords[i][0];
       let number = allCoords[i][1];
@@ -356,6 +354,18 @@ export const createPlayer = function (name) {
       if (number < 1 || number > 10) return false;
     }
     return true;
+  };
+
+  const getNumericalShipCoords = function() {
+    const ships = playerBoard.getShips();
+    const coords = [];
+    for (let i = 0; i < ships.length; i++) {
+      let shipCoords = ships[i].coords;
+      for (let j = 0; j < shipCoords.length; j++) {
+        coords.push(convertLetterCoordsToID(shipCoords[j]));
+      }
+    }
+    return coords;
   }
 
   return {
@@ -371,5 +381,6 @@ export const createPlayer = function (name) {
     debugGetBoard,
     AIGenPlacements,
     testAIGenPlacements,
+    getNumericalShipCoords
   };
 };

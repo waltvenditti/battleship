@@ -1,5 +1,5 @@
 import { createPlayer } from './factory-functions';
-import { coordsStorage, removePlacementBoard } from './dom-functions';
+import { coordsStorage, genGameBoard, removePlacementBoard, addShipsToPlayerBoard } from './dom-functions';
 
 export const arf = function() {
     // arf 
@@ -22,10 +22,27 @@ const createPlayerComputer = function() {
     return computer;
 };
 
+export const playerStorage = (() => {
+    const players = [];
+    const storePlayer = (player) => {
+      players.push(player);
+    };
+    const getPlayers = () => {
+        return players;
+    }
+    return {
+      storePlayer,
+      getPlayers
+    };
+  })();
+
 export const startGame = function() {
     let player = createPlayerHuman();
     let computer = createPlayerComputer();
+    playerStorage.storePlayer(player);
+    playerStorage.storePlayer(computer);
     removePlacementBoard();
+    genGameBoard();
     // remove placement board
     // gen two new boards, smaller, side by side
     // left one shows player's ship placements
