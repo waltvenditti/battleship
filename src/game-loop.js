@@ -27,9 +27,7 @@ export const playerStorage = (() => {
     const storePlayer = (player) => {
       players.push(player);
     };
-    const getPlayers = () => {
-        return players;
-    }
+    const getPlayers = () => players;
     return {
       storePlayer,
       getPlayers
@@ -43,6 +41,7 @@ export const startGame = function() {
     playerStorage.storePlayer(computer);
     removePlacementBoard();
     genGameBoard();
+    addShipsToPlayerBoard(player.getNumericalShipCoords());
     // remove placement board
     // gen two new boards, smaller, side by side
     // left one shows player's ship placements

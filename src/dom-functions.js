@@ -1,5 +1,6 @@
 import { doc } from "prettier";
 import { startGame, playerStorage } from "./game-loop";
+import { convertLetterCoordsToID } from "./factory-functions";
 
 // module to store coordinates for access by main loop
 export const coordsStorage = (() => {
@@ -236,35 +237,91 @@ function clickPlacementSquare() {
   }
 }
 
-const attackComputer = function() {
-  // game loop is here 
+const changeSquareToHit = function (squareID) {
+  const square = document.querySelector(`#${squareID}`);
+  square.classList.remove("hover-square");
+  square.classList.remove("square");
+  square.classList.add("hit-square");
+};
+
+const changeSquareToMiss = function (squareID) {
+  const square = document.querySelector(`#${squareID}`);
+  square.classList.remove("hover-square");
+  square.classList.remove("square");
+  square.classList.add("miss-square");
+};
+
+const checkIfGameOver = function (player) {
+  if (player.getFleetStatus()) return true;
+  return false;
+};
+
+const gameOverFor = function (player) {
+  let loser = player.getName();
+  if (loser === "computer") alert("Player Wins");
+  else alert("Computer Wins");
+};
+
+const computerAttacks = function () {
+  const followups = [];
+  const computer = playerStorage.getPlayers()[1];
+  const player = playerStorage.getPlayers()[0];
+  while (true) {
+    let attackCoords;
+    let hit;
+    let squareID;
+    let attackID;
+    if (followups.length === 0) {
+      attackCoords = computer.AIGenValidMove();
+      attackID = convertLetterCoordsToID(attackCoords);
+      squareID = `pl${attackID[0]}${attackID[1]}`;
+      hit = player.receiveHit(attackCoords);
+      computer.logPlayerAttack(attackCoords);
+    } else {
+      attackID = followups.pop();
+      attackCoords = convIDtoCoord(attackID[0], attackID[1]);
+      // console.log(attackCoords);
+      squareID = `pl${attackID[0]}${attackID[1]}`;
+      hit = player.receiveHit(attackCoords);
+      computer.logPlayerAttack(attackCoords);
+      // console.log(hit);
+    }
+    if (hit === true) {
+      changeSquareToHit(squareID);
+      if (checkIfGameOver(player)) gameOverFor(player);
+      let newAttacks = computer.AIGenFollowupAttacks(attackID);
+      while (followups.length > 0) followups.pop();
+      for (let i = 0; i < newAttacks.length; i++) {
+        followups.push(newAttacks[i]);
+      }
+    }
+    if (hit === false) {
+      changeSquareToMiss(squareID);
+      break;
+    }
+  }
+};
+
+const attackComputer = function () {
   let row = parseInt(this.id[2], 10);
   let square = parseInt(this.id[3], 10);
   let coord = convIDtoCoord(row, square);
-  // convert attackCoord to letter-number form
   const computer = playerStorage.getPlayers()[1];
-  computer.receiveHit(coord);
-  let debugBoard = computer.debugGetBoard();
-  let misses = debugBoard.checkMisses();
-  console.log(misses);
-  // get the ships too and print them
-  
-  // get square ID
-  // check if AI has a ship at that coord
-    // if yes: 
-      // turn square red
-      // check if game over
-      // player gets another turn
-    // if no: 
-      // turn square gray
-  // computer attacks one of players squares
-    // if hit:
-      // turn square red
-      // check if game over
-      // computer attacks again
-    // if miss:
-      // turn square gray
-}
+  let hit = computer.receiveHit(coord);
+  if (hit === true) {
+    changeSquareToHit(this.id);
+    if (checkIfGameOver(computer)) gameOverFor(computer);
+    return;
+  }
+  if (hit === false) {
+    changeSquareToMiss(this.id);
+    computerAttacks();
+  }
+  if (hit === null) return;
+  // let debugBoard = computer.debugGetBoard();
+  // let ships = debugBoard.getShips();
+  // console.log(ships);
+};
 
 export const removePlacementBoard = function () {
   const divMain = document.querySelector("#main");

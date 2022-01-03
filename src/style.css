@@ -51,6 +51,20 @@ h2 {
     border: 1px solid black;
 }
 
+.hit-square {
+    background-color: indianred;
+    height: 36px;
+    width: 36px;
+    border: 1px solid black;
+}
+
+.miss-square {
+    background-color: darkseagreen;
+    height: 36px;
+    width: 36px;
+    border: 1px solid black;   
+}
+
 .coord-square {
     text-align: center;
     height: 36px;

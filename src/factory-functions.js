@@ -1,5 +1,12 @@
 import { convIDtoCoord } from "./dom-functions";
 
+export const convertLetterCoordsToID = function (coords) {
+  const letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+  let firstCoord = coords[0];
+  let firstCoordNum = letters.indexOf(firstCoord);
+  return [firstCoordNum, coords[1] - 1];
+};
+
 export const shipFactory = (length) => {
   if (length < 2 || length > 5 || length === undefined) {
     return null;
@@ -71,6 +78,7 @@ export function checkArrayEquality(arr1, arr2) {
 export const gameboardFactory = () => {
   const shipArray = [];
   const missArray = [];
+  const hitArray = [];
 
   const placeShip = function (shipObj, firstCoord, orientation) {
     const shipCoords = getCoords(shipObj.getLength(), firstCoord, orientation);
@@ -95,15 +103,44 @@ export const gameboardFactory = () => {
     missArray.push(missCoord);
   };
 
+  const logHit = function (hitCoord) {
+    hitArray.push(hitCoord);
+  }
+
+  const checkHitInHits = function (hit) {
+    for (let i = 0; i < hitArray.length; i++) {
+      if (checkArrayEquality(hitArray[i], hit)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  const checkMissInMisses = function (miss) {
+    for (let i = 0; i < missArray.length; i++) {
+      if (checkArrayEquality(missArray[i], miss)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   const checkHit = function (hitCoords) {
     for (let i = 0; i < shipArray.length; i++) {
       for (let j = 0; j < shipArray[i].coords.length; j++) {
         if (checkArrayEquality(shipArray[i].coords[j], hitCoords)) {
+          if (checkHitInHits(hitCoords)) {
+            return null;
+          }
           shipArray[i].ship.hit(j);
+          logHit(hitCoords);
           return true;
         }
       }
     }
+    if (checkMissInMisses(hitCoords)) {
+      return null;
+    } 
     logMiss(hitCoords);
     return false;
   };
@@ -112,11 +149,22 @@ export const gameboardFactory = () => {
     return missArray;
   };
 
+  const checkHits = function () {
+    return hitArray;
+  };
+
   const getShips = function () {
     return shipArray;
   };
 
-  return { placeShip, checkFleetSunk, checkHit, checkMisses, getShips };
+  return {
+    placeShip,
+    checkFleetSunk,
+    checkHit,
+    checkMisses,
+    getShips,
+    checkHits,
+  };
 };
 
 export const createPlayer = function (name) {
@@ -138,7 +186,8 @@ export const createPlayer = function (name) {
   };
 
   const receiveHit = function (hitCoords) {
-    playerBoard.checkHit(hitCoords);
+    let hitStatus = playerBoard.checkHit(hitCoords);
+    return hitStatus;
   };
 
   const logPlayerAttack = function (attackCoords) {
@@ -182,7 +231,7 @@ export const createPlayer = function (name) {
 
   // generates a random coordinate for AI and
   // checks it using checkLegalMove
-  const genValidMove = function () {
+  const AIGenValidMove = function () {
     let randomMove = genRandomCoord();
     while (true) {
       if (checkLegalMove(randomMove)) {
@@ -194,14 +243,38 @@ export const createPlayer = function (name) {
     return randomMove;
   };
 
-  // makes coordinates numerical so they can be used
-  // by checkValidPlacement
-  const convertLetterCoordsToID = function (coords) {
-    const letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
-    let firstCoord = coords[0];
-    let firstCoordNum = letters.indexOf(firstCoord);
-    return [firstCoordNum, coords[1] - 1];
-  };
+  const checkFollowupValidity = function (id) {
+    const row = id[0];
+    const square = id[1];
+    const letterID = convIDtoCoord(row, square);
+    console.log(`from checkFollowup: ${letterID}`);
+    if (row > 9 || row < 0 || square > 9 || square < 0) {     
+      return false;
+    }
+    for (let i = 0; i < shotsMadeByPlayer.length; i++) {
+      if (checkArrayEquality(shotsMadeByPlayer[i], letterID)) {
+        return false;
+      }
+    }
+    return true; 
+  }
+
+  const AIGenFollowupAttacks = function (prevAtkCoords) {
+    console.log(`attack at ${prevAtkCoords}`);
+    const followups = [];
+    const row = prevAtkCoords[0];
+    const square = prevAtkCoords[1];
+    const up = [row-1, square];
+    const down = [row+1, square];
+    const left = [row, square-1];
+    const right = [row, square+1];
+    if (checkFollowupValidity(up)) followups.push(up);
+    if (checkFollowupValidity(down)) followups.push(down);
+    if (checkFollowupValidity(left)) followups.push(left);
+    if (checkFollowupValidity(right)) followups.push(right);
+    console.log(followups);
+    return followups;
+  }
 
   const getIndex = function (board, coord) {
     for (let i = 0; i < board.length; i++) {
@@ -356,7 +429,7 @@ export const createPlayer = function (name) {
     return true;
   };
 
-  const getNumericalShipCoords = function() {
+  const getNumericalShipCoords = function () {
     const ships = playerBoard.getShips();
     const coords = [];
     for (let i = 0; i < ships.length; i++) {
@@ -366,7 +439,7 @@ export const createPlayer = function (name) {
       }
     }
     return coords;
-  }
+  };
 
   return {
     getName,
@@ -377,10 +450,11 @@ export const createPlayer = function (name) {
     getFleetStatus,
     getPlayerMisses,
     checkLegalMove,
-    genValidMove,
+    AIGenValidMove,
     debugGetBoard,
     AIGenPlacements,
     testAIGenPlacements,
-    getNumericalShipCoords
+    getNumericalShipCoords,
+    AIGenFollowupAttacks,
   };
 };

@@ -172,7 +172,7 @@ test('tests if AI can distinguish valid from invalid moves', () => {
             ]);
         }
     }
-    const randomMove = testPlayerRandom.genValidMove();
+    const randomMove = testPlayerRandom.AIGenValidMove();
     expect(randomMove).toEqual(['J',10]);
 });
 
