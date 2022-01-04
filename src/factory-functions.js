@@ -262,7 +262,7 @@ export const createPlayer = function (name) {
   }
 
   const AIGenFollowupAttacks = function (prevAtkCoords) {
-    AIClearFollowups();
+    // AIClearFollowups();
     const followups = [];
     const row = prevAtkCoords[0];
     const square = prevAtkCoords[1];

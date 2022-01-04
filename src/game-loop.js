@@ -1,9 +1,7 @@
 import { createPlayer } from './factory-functions';
 import { coordsStorage, genGameBoard, removePlacementBoard, addShipsToPlayerBoard } from './dom-functions';
 
-export const arf = function() {
-    // arf 
-};
+
 
 const createPlayerHuman = function() {
     const shipLength = [5, 4, 3, 2, 2];
@@ -28,9 +26,13 @@ export const playerStorage = (() => {
       players.push(player);
     };
     const getPlayers = () => players;
+    const clearPlayers = () => {
+      while (players.length > 0) players.pop();
+    }
     return {
       storePlayer,
-      getPlayers
+      getPlayers,
+      clearPlayers
     };
   })();
 
