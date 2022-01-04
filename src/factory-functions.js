@@ -172,6 +172,7 @@ export const createPlayer = function (name) {
   const playerName = name;
   const shotsMadeByPlayer = [];
   const playerBoard = gameboardFactory();
+  const storedFollowups = [];
 
   const storeShip = function (len, coords, orientation) {
     // len: integer with value ranging from 2 to 5
@@ -218,8 +219,6 @@ export const createPlayer = function (name) {
     ];
   };
 
-  // checks that player has not already
-  // made this move
   const checkLegalMove = function (moveCoords) {
     for (let i = 0; i < shotsMadeByPlayer.length; i++) {
       if (checkArrayEquality(shotsMadeByPlayer[i], moveCoords)) {
@@ -229,8 +228,6 @@ export const createPlayer = function (name) {
     return true;
   };
 
-  // generates a random coordinate for AI and
-  // checks it using checkLegalMove
   const AIGenValidMove = function () {
     let randomMove = genRandomCoord();
     while (true) {
@@ -247,7 +244,6 @@ export const createPlayer = function (name) {
     const row = id[0];
     const square = id[1];
     const letterID = convIDtoCoord(row, square);
-    console.log(`from checkFollowup: ${letterID}`);
     if (row > 9 || row < 0 || square > 9 || square < 0) {     
       return false;
     }
@@ -259,8 +255,14 @@ export const createPlayer = function (name) {
     return true; 
   }
 
+  const AIClearFollowups = function () {
+    while (storedFollowups.length > 0) {
+      storedFollowups.pop();
+    }
+  }
+
   const AIGenFollowupAttacks = function (prevAtkCoords) {
-    console.log(`attack at ${prevAtkCoords}`);
+    AIClearFollowups();
     const followups = [];
     const row = prevAtkCoords[0];
     const square = prevAtkCoords[1];
@@ -272,8 +274,17 @@ export const createPlayer = function (name) {
     if (checkFollowupValidity(down)) followups.push(down);
     if (checkFollowupValidity(left)) followups.push(left);
     if (checkFollowupValidity(right)) followups.push(right);
-    console.log(followups);
-    return followups;
+    for (let i = 0; i < followups.length; i++) {
+      storedFollowups.push(followups[i]);
+    }
+  }
+
+  const AIPopFollowups = function () {
+    return storedFollowups.pop();
+  }
+
+  const AIGetFollowupsLength = function () {
+    return storedFollowups.length;
   }
 
   const getIndex = function (board, coord) {
@@ -283,7 +294,6 @@ export const createPlayer = function (name) {
     return -1;
   };
 
-  // generates a blank board of numerical coords
   const AIGenPlaceBlankBoard = function () {
     const blankBoard = [];
     for (let i = 0; i < 10; i++) {
@@ -312,8 +322,6 @@ export const createPlayer = function (name) {
   };
 
   const AIGenPlaceRandomShip = function () {
-    // generates a random coordinate pair plus
-    // a randomly chosen orientation
     const orients = ["horizontal", "vertical"];
     const row = Math.floor(Math.random() * 10);
     const square = Math.floor(Math.random() * 10);
@@ -351,9 +359,6 @@ export const createPlayer = function (name) {
     return true;
   };
 
-  // this randomly  generates five ship positions,
-  // checks they are valid in terms of board and other
-  // ship locations, then stores them
   const AIGenPlacements = function () {
     const shipLengths = [5, 4, 3, 2, 2];
     for (let i = 0; i < 5; i++) {
@@ -377,11 +382,6 @@ export const createPlayer = function (name) {
       }
     }
   };
-
-  // AI logic
-  // special logic for if a hit is made, checks surrounding squares
-  // hit made - gen's array of moves to do - does them one by one
-  //
 
   const testAIGenPlacements = function () {
     const shipLengths = [5, 4, 3, 2, 2];
@@ -456,5 +456,8 @@ export const createPlayer = function (name) {
     testAIGenPlacements,
     getNumericalShipCoords,
     AIGenFollowupAttacks,
+    AIPopFollowups,
+    AIClearFollowups,
+    AIGetFollowupsLength
   };
 };

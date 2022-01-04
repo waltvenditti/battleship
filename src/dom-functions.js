@@ -27,7 +27,7 @@ export const coordsStorage = (() => {
   };
 })();
 
-export const genPlacementBoard = function () {
+export const OLDgenPlacementBoard = function () {
   const board = document.querySelector("#board");
   const divCoordRow = document.createElement("div");
   const divSquareBlank = document.createElement("div");
@@ -65,9 +65,95 @@ export const genPlacementBoard = function () {
   }
 };
 
+export const genPlacementBoard = function () {
+  const divMain = document.querySelector("#main");
+  const divPlacementBoard = document.createElement("div");
+  const divHorizFlex = document.createElement("div");
+  const board = document.createElement("div");
+  const divPlacementOpts = document.createElement("div");
+  const divVertFlex = document.createElement("div");
+  const divBlank = document.createElement("div");
+  const spanPlace = document.createElement("span");
+  const spanShipName = document.createElement("span");
+  const btnRotate = document.createElement("button");
+  const btnReset = document.createElement("button");
+  const divCoordRow = document.createElement("div");
+  const divSquareBlank = document.createElement("div");
+
+  divPlacementBoard.setAttribute("id", "placement-board");
+  board.setAttribute("id", "board");
+  divPlacementOpts.setAttribute("id", "placement-options");
+  spanShipName.setAttribute("id", "ship-name");
+  btnRotate.setAttribute("id", "rotate-button");
+  btnReset.setAttribute("id", "reset-button");
+
+  divHorizFlex.classList.add("horiz-flex-div");
+  divVertFlex.classList.add("vert-flex-div");
+  divCoordRow.classList.add("row");
+  divSquareBlank.classList.add("coord-square");
+  btnRotate.classList.add("horizontal");
+
+  spanPlace.textContent = "Place ";
+  spanShipName.textContent = "Carrier";
+  btnRotate.textContent = "Rotate Ship";
+  btnReset.textContent = "Reset Ships";
+
+  divMain.appendChild(divPlacementBoard);
+  divPlacementBoard.appendChild(divHorizFlex);
+  divHorizFlex.appendChild(board);
+  divHorizFlex.appendChild(divPlacementOpts);
+  divPlacementOpts.appendChild(divVertFlex);
+  divVertFlex.appendChild(divBlank);
+  divBlank.appendChild(spanPlace);
+  divBlank.appendChild(spanShipName);
+  divVertFlex.appendChild(btnRotate);
+  divVertFlex.appendChild(btnReset);
+
+  divCoordRow.appendChild(divSquareBlank);
+  board.appendChild(divCoordRow);
+
+  for (let i = 0; i < 10; i++) {
+    const coords = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+    let divRow = document.createElement("div");
+    divRow.classList.add("row");
+    board.appendChild(divRow);
+    for (let j = 0; j < 10; j++) {
+      if (j === 0) {
+        let divCoord = document.createElement("div");
+        let divCoordNum = document.createElement("div");
+        divCoord.classList.add("coord-square");
+        divCoordNum.classList.add("coord-square");
+        divCoord.textContent = `${coords[i]}`;
+        divCoordNum.textContent = `${i + 1}`;
+        divRow.appendChild(divCoord);
+        divCoordRow.appendChild(divCoordNum);
+      }
+      let divSquare = document.createElement("div");
+      divSquare.classList.add("square");
+      divSquare.setAttribute("id", `sq${i}${j}`);
+      divSquare.addEventListener("mouseover", hoverOnPlacementSquare);
+      divSquare.addEventListener("mouseout", hoverOffPlacementSquare);
+      divSquare.addEventListener("click", clickPlacementSquare);
+      divRow.appendChild(divSquare);
+    }
+  }
+};
+
 export const addButtonFunctionality = function () {
   const btnRotate = document.querySelector("#rotate-button");
   const btnReset = document.querySelector("#reset-button");
+  const btnReplay = document.querySelector("#replay");
+
+  btnReplay.style.display = "none";
+
+  btnReplay.addEventListener("click", () => {
+    const divMain = document.querySelector("#main");
+    const divGame = document.querySelector("#game-div");
+    divMain.removeChild(divGame);
+    genPlacementBoard();
+    addButtonFunctionality();
+    coordsStorage.clearCoords();
+  });
 
   btnRotate.addEventListener("click", () => {
     if (btnRotate.classList.contains("horizontal")) {
@@ -80,12 +166,13 @@ export const addButtonFunctionality = function () {
   });
 
   btnReset.addEventListener("click", () => {
-    const board = document.querySelector("#board");
+    const main = document.querySelector("#main");
     const shipName = document.querySelector("#ship-name");
-    while (board.lastChild) {
-      board.removeChild(board.lastChild);
+    while (main.lastChild) {
+      main.removeChild(main.lastChild);
     }
     genPlacementBoard();
+    addButtonFunctionality();
     shipName.textContent = "Carrier";
     coordsStorage.clearCoords();
   });
@@ -256,44 +343,62 @@ const checkIfGameOver = function (player) {
   return false;
 };
 
+const freezeBoard = function (player) {
+  const squares = document.querySelectorAll(".square");
+  const hSquares = document.querySelectorAll(".hit-square");
+  const mSquares = document.querySelectorAll(".miss-square");
+  const sSquares = document.querySelectorAll("ship-square");
+  // removeEventListener
+  for (let i = 0; i < squares.length; i++) {
+    squares[i].removeEventListener("????");
+  }
+}
+
 const gameOverFor = function (player) {
   let loser = player.getName();
-  if (loser === "computer") alert("Player Wins");
-  else alert("Computer Wins");
+  const banner = document.querySelector("h2");
+  if (loser === "computer") {
+    banner.textContent = "Human Wins";
+    banner.style.color = "darkred";
+    // freeze boards
+
+    // add button to play again
+  } else {
+    banner.textContent = "AI Wins";
+    banner.style.color = "mediumblue";
+  }
+  freezeBoard();
 };
 
 const computerAttacks = function () {
-  const followups = [];
   const computer = playerStorage.getPlayers()[1];
   const player = playerStorage.getPlayers()[0];
+  const fLen = computer.AIGetFollowupsLength();
   while (true) {
     let attackCoords;
     let hit;
     let squareID;
     let attackID;
-    if (followups.length === 0) {
+    if (fLen === 0) {
       attackCoords = computer.AIGenValidMove();
       attackID = convertLetterCoordsToID(attackCoords);
       squareID = `pl${attackID[0]}${attackID[1]}`;
       hit = player.receiveHit(attackCoords);
       computer.logPlayerAttack(attackCoords);
     } else {
-      attackID = followups.pop();
+      attackID = computer.AIPopFollowups();
       attackCoords = convIDtoCoord(attackID[0], attackID[1]);
-      // console.log(attackCoords);
       squareID = `pl${attackID[0]}${attackID[1]}`;
       hit = player.receiveHit(attackCoords);
       computer.logPlayerAttack(attackCoords);
-      // console.log(hit);
     }
     if (hit === true) {
       changeSquareToHit(squareID);
-      if (checkIfGameOver(player)) gameOverFor(player);
-      let newAttacks = computer.AIGenFollowupAttacks(attackID);
-      while (followups.length > 0) followups.pop();
-      for (let i = 0; i < newAttacks.length; i++) {
-        followups.push(newAttacks[i]);
+      if (checkIfGameOver(player)) {
+        gameOverFor(player);
+        break;
       }
+      computer.AIGenFollowupAttacks(attackID);
     }
     if (hit === false) {
       changeSquareToMiss(squareID);
@@ -326,7 +431,9 @@ const attackComputer = function () {
 export const removePlacementBoard = function () {
   const divMain = document.querySelector("#main");
   const divPlacement = document.querySelector("#placement-board");
-  divMain.removeChild(divPlacement);
+  if (divPlacement !== null) {
+    divMain.removeChild(divPlacement);
+  }
 };
 
 export const addShipsToPlayerBoard = function (coordsArray) {

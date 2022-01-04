@@ -42,17 +42,4 @@ export const startGame = function() {
     removePlacementBoard();
     genGameBoard();
     addShipsToPlayerBoard(player.getNumericalShipCoords());
-    // remove placement board
-    // gen two new boards, smaller, side by side
-    // left one shows player's ship placements
-    // right one is a blank one reflecting AI chosen ship locations
-    // most of the below game logic will be in eventListeners
-    // player turn, they click on a square on computer side
-    // if miss, turn square grey and now is computer's turn
-    // if hit:
-        // turn square red
-        // check if fleet sunk
-            // if yes, game over
-            // if no, give that player another turn
-    // repeat until game over
 };
